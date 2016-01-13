@@ -4,7 +4,7 @@ namespace Peping\PageState;
 interface IPageStateControlFactory
 {
 	/**
-	 * @return PageState
+	 * @return PageStateControl
 	 */
 	public function create();
 }
