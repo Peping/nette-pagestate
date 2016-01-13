@@ -2,6 +2,12 @@
 
 namespace Peping\PageState;
 
+use Nette\Application\UI\Presenter;
+use Nette\Http\IRequest;
+use Nette\Http\Request;
+use Nette\Utils\ArrayHash;
+use Nette\Utils\Html;
+
 class PageStateControl extends \Nette\Application\UI\Control
 {
 	/**
@@ -9,9 +15,21 @@ class PageStateControl extends \Nette\Application\UI\Control
 	 */
 	protected $state;
 
-	public function __construct()
+	/**
+	 * @var IRequest
+	 */
+	protected $httpRequest;
+
+	/**
+	 * @var Presenter
+	 */
+	protected $myPresenter;
+
+
+	public function injectHttpRequest(\Nette\Http\IRequest $httpRequest)
 	{
-		$this->monitor('Nette\Application\UI\Presenter');
+		$this->httpRequest = $httpRequest;
+		$this->setState();
 	}
 
 	/**
@@ -19,14 +37,27 @@ class PageStateControl extends \Nette\Application\UI\Control
 	 */
 	public function attached($presenter)
 	{
-		if ($presenter instanceof \Nette\Application\UI\Presenter) {
+		if ($presenter instanceof Presenter) {
 			/**
 			 * @var \Nette\Application\UI\Presenter $presenter;
 			 */
-			$this->state = \Nette\Utils\Json::decode(
-				$presenter->getHttpRequest()->getHeader('X-NETTE-PAGESTATE','{}')
-			);
+			$this->myPresenter = $presenter;
+			$this->setState();
 		}
+	}
+
+	protected function setState()
+	{
+		$this->state = new ArrayHash();
+		if (!$this->myPresenter || !$this->httpRequest) {
+			return;
+		}
+
+		$this->state = \Nette\Utils\Json::decode(
+			$this->httpRequest->getHeader('X-Nette-Pagestate','{}')
+		);
+
+		$this->redrawControl();
 	}
 
 	public function getStateForComponent(\Nette\ComponentModel\IComponent $component)
@@ -45,6 +76,23 @@ class PageStateControl extends \Nette\Application\UI\Control
 
 	public function render()
 	{
-		echo \Nette\Utils\Html::el('span',['id' => 'nette-pagestate-container', 'data-state' => \Nette\Utils\Json::encode($this->state)]);
+		if ($this->httpRequest->isAjax()) {
+			if (!isset($this->myPresenter->payload->snippets)) {
+				$this->myPresenter->payload->snippets = [];
+			}
+
+			$this->myPresenter->payload->snippets[$this->getSnippetId('state')] = $this->getStateElement()->render();
+		} else {
+			echo Html::el('span', ['id' => $this->getSnippetId('state')])
+				->add($this->getStateElement());
+		}
+	}
+
+	/**
+	 * @return Html
+	 */
+	protected function getStateElement()
+	{
+		return Html::el('span', ['id' => 'nette-pagestate-container', 'data-state' => \Nette\Utils\Json::encode($this->state)]);
 	}
 }

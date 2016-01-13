@@ -21,6 +21,7 @@ trait TPageStateControl
 	public function injectPageStateControlFactory(IPageStateControlFactory $pageStateControlFactory)
 	{
 		$this->pageStateControlFactory = $pageStateControlFactory;
+		$this['pageStateControl'];
 	}
 
 	public function createComponentPageStateControl()

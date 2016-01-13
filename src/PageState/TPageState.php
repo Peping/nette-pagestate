@@ -8,6 +8,6 @@ trait TPageState
 	 */
 	public function getPageState()
 	{
-		return $this->presenter['pageStateControl']->getStateForComponent($this->name);
+		return $this->presenter['pageStateControl']->getStateForComponent($this);
 	}
 }
