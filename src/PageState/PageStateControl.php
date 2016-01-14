@@ -7,6 +7,7 @@ use Nette\Http\IRequest;
 use Nette\Http\Request;
 use Nette\Utils\ArrayHash;
 use Nette\Utils\Html;
+use Nette\Utils\Json;
 
 class PageStateControl extends \Nette\Application\UI\Control
 {
@@ -53,19 +54,17 @@ class PageStateControl extends \Nette\Application\UI\Control
 			return;
 		}
 
-		$this->state = \Nette\Utils\Json::decode(
-			$this->httpRequest->getHeader('X-Nette-Pagestate','{}')
-		);
-
-		$this->redrawControl();
+		$header = $this->httpRequest->getHeader('X-Nette-Pagestate', '{}');
+		if ($header) {
+			$this->state = Json::decode($header);
+		}
 	}
 
 	public function getStateForComponent(\Nette\ComponentModel\IComponent $component)
 	{
 		$name = $component->getName();
 
-		if (isset($this->state->$name))
-		{
+		if (isset($this->state->$name))	{
 			return $this->state->$name;
 		} else {
 			$state = new \Nette\Utils\ArrayHash();
