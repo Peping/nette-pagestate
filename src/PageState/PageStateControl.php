@@ -3,11 +3,11 @@
 namespace Peping\PageState;
 
 use Nette\Application\UI\Presenter;
+use Nette\Application\UI\PresenterComponent;
 use Nette\Http\IRequest;
 use Nette\Http\Request;
 use Nette\Utils\ArrayHash;
 use Nette\Utils\Html;
-use Nette\Utils\Json;
 
 class PageStateControl extends \Nette\Application\UI\Control
 {
@@ -54,17 +54,19 @@ class PageStateControl extends \Nette\Application\UI\Control
 			return;
 		}
 
-		$header = $this->httpRequest->getHeader('X-Nette-Pagestate', '{}');
-		if ($header) {
-			$this->state = Json::decode($header);
-		}
+		$this->state = \Nette\Utils\Json::decode(
+			$this->httpRequest->getHeader('X-Nette-Pagestate','{}')
+		);
+
+		$this->redrawControl();
 	}
 
-	public function getStateForComponent(\Nette\ComponentModel\IComponent $component)
+	public function getStateForComponent(PresenterComponent $component)
 	{
-		$name = $component->getName();
+		$name = $component->getUniqueId();
 
-		if (isset($this->state->$name))	{
+		if (isset($this->state->$name))
+		{
 			return $this->state->$name;
 		} else {
 			$state = new \Nette\Utils\ArrayHash();
