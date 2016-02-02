@@ -55,7 +55,7 @@ class PageStateControl extends \Nette\Application\UI\Control
 		}
 
 		$this->state = \Nette\Utils\Json::decode(
-			$this->httpRequest->getHeader('X-Nette-Pagestate','{}')
+			base64_decode($this->httpRequest->getHeader('X-Nette-Pagestate', base64_encode('{}')))
 		);
 
 		$this->redrawControl();
@@ -94,6 +94,12 @@ class PageStateControl extends \Nette\Application\UI\Control
 	 */
 	protected function getStateElement()
 	{
-		return Html::el('span', ['id' => 'nette-pagestate-container', 'data-state' => \Nette\Utils\Json::encode($this->state)]);
+		return Html::el(
+			'span',
+			[
+				'id' => 'nette-pagestate-container',
+				'data-state' => base64_encode(\Nette\Utils\Json::encode($this->state))
+			]
+		);
 	}
 }
