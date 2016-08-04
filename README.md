@@ -36,6 +36,9 @@ public function render()
 
 	// PHP 5
 	$clickCount = isset($pageState->clickCount) ? $pageState->clickCount : 0;
+
+	// Pass the clickCount to the template
+	$this->template->clickCount = $clickCount;
 }
 
 public function handleClick()
@@ -43,9 +46,12 @@ public function handleClick()
 	// The button has been clicked, increment the click count and redraw the button's snippet
 
 	// PHP 7
-	$pageState->clickCount = ($pageState->clickCount ?? 0) + 1
+	$pageState->clickCount = ($pageState->clickCount ?? 0) + 1;
 
 	// PHP 5
 	$pageState->clickCount = isset($pageState->clickCount) ? $pageState->clickCount + 1 : 1;
+
+	// redraw the button's snippet.
+	$this->redrawControl('buttonSnippet');
 }
 ```
